@@ -23,13 +23,19 @@ Card.prototype.display = function(){
 // threeOfClubs.beats(kingOfDiamonds) // false
 
 Card.prototype.beats = function(otherCard){
-  if(this.numericalValue === otherCard.numericalValue){
-    // spades is 4, hearts is 3, diamonds is 2, clubs is 1
-    var suitValues = { spades: 4, hearts: 3, diamonds: 2, clubs: 1 };
-    return suitValues[this.suit] > suitValues[otherCard.suit]
-  } else {
-    return this.numericalValue > otherCard.numericalValue
-  }
+  return this.numericalValue > otherCard.numericalValue
+}
+
+Card.prototype.differs = function(otherCard) {
+return this.numericalValue !== otherCard.numericalValue
+}
+
+Card.prototype.ties = function(otherCard) {
+return this.numericalValue === otherCard.numericalValue
+}
+
+Card.prototype.beatstwo = function(otherCard){
+  return this.numericalValue > otherCard.numericalValue
 }
 
 var myCard = { value: "queen", suit: "hearts"};
@@ -71,6 +77,19 @@ Player.prototype.presentCard = function(){
   // in the player's hand
   return this.hand.shift();
 }
+
+Player.prototype.presentBattleCard = function(){
+  // should return the first card
+  // in the player's hand
+  return this.hand.shift();
+}
+
+Player.prototype.presentTwoCards = function(){
+  // should return three cards
+  // in the player's hand
+  return this.hand.splice(0, 2);
+}
+
 Player.prototype.take = function(cardOne, cardTwo){
   this.hand.push(cardOne);
   this.hand.push(cardTwo);
@@ -87,23 +106,76 @@ function Game(playerOne, playerTwo){
 }
 // assuming each player has at least one card
 
+// Game.prototype.battle = function(){
+//
+// // each player presents a card
+//   var firstPlayersCard = this.playerOne.presentCard();
+//   console.log(firstPlayersCard);
+//   var secondPlayersCard = this.playerTwo.presentCard();
+//   console.log(secondPlayersCard);
+// //and whoever's card has the higher value
+//   if(firstPlayersCard.beats(secondPlayersCard)){
+//     console.log(`${this.playerOne.name} wins the battle!`);
+// // puts both cards at the bottom of the winner's hand
+//     this.playerOne.take(firstPlayersCard, secondPlayersCard);
+//   } else {
+//     console.log(`${this.playerTwo.name} wins the battle!`);
+//     this.playerTwo.take(firstPlayersCard, secondPlayersCard);
+//   }
+//   console.log(this.status())
+//
+//   this.checkForWinner()
+// }
+
 Game.prototype.battle = function(){
 
 // each player presents a card
   var firstPlayersCard = this.playerOne.presentCard();
+  console.log(firstPlayersCard);
   var secondPlayersCard = this.playerTwo.presentCard();
+  console.log(secondPlayersCard);
 //and whoever's card has the higher value
-  if(firstPlayersCard.beats(secondPlayersCard)){
-    console.log(`${this.playerOne.name} wins the battle!`);
-// puts both cards at the bottom of the winner's hand
-    this.playerOne.take(firstPlayersCard, secondPlayersCard);
-  } else {
-    console.log(`${this.playerTwo.name} wins the battle!`);
-    this.playerTwo.take(firstPlayersCard, secondPlayersCard);
+  if (firstPlayersCard.differs(secondPlayersCard)) {
+    if(firstPlayersCard.beats(secondPlayersCard)){
+      console.log(`${this.playerOne.name} wins the battle!`);
+  // puts both cards at the bottom of the winner's hand
+      this.playerOne.take(firstPlayersCard, secondPlayersCard);
+    } else {
+      console.log(`${this.playerTwo.name} wins the battle!`);
+      this.playerTwo.take(firstPlayersCard, secondPlayersCard);
+    }
+    console.log(this.status())
+  } else if (firstPlayersCard.ties(secondPlayersCard)) {
+        console.log(firstPlayersCard);
+        console.log(secondPlayersCard);
+        console.log("It's a tie!");
+    var firstPlayersTwoCards = this.playerOne.presentTwoCards();
+    console.log(firstPlayersTwoCards);
+    var secondPlayersTwoCards = this.playerTwo.presentTwoCards();
+    console.log(secondPlayersTwoCards);
+
+    var firstPlayersBattleCard = this.playerOne.presentBattleCard();
+    console.log(firstPlayersBattleCard);
+    var secondPlayersBattleCard = this.playerTwo.presentBattleCard();
+    console.log(secondPlayersBattleCard);
+
+    var cardsWon =  [firstPlayersTwoCards, firstPlayersBattleCard,
+                    secondPlayersTwoCards, secondPlayersBattleCard,
+                    firstPlayersCard, secondPlayersCard];
+
+    if(firstPlayersBattleCard.beatstwo(secondPlayersBattleCard)){
+      console.log(`${this.playerOne.name} wins the battle!`);
+  // puts both cards at the bottom of the winner's hand
+      this.playerOne.take(cardsWon);
+    } else {
+      console.log(`${this.playerTwo.name} wins the battle!`);
+      this.playerTwo.take(cardsWon);
+    }
+        console.log(this.status())
   }
-  console.log(this.status())
   this.checkForWinner()
 }
+
 Game.prototype.checkForWinner = function(){
   if(this.playerOne.hand.length < 10){
     this.winner = this.playerTwo
@@ -117,7 +189,8 @@ Game.prototype.checkForWinner = function(){
 }
 // status shows how many cards each person has
 Game.prototype.status = function(){
-  return `${this.playerOne.name} has ${this.playerOne.hand.length} cards remaining; ${this.playerTwo.name} has ${this.playerTwo.hand.length} cards`
+  return `${this.playerOne.name} has ${this.playerOne.hand.length} cards remaining;
+  ${this.playerTwo.name} has ${this.playerTwo.hand.length} cards`
 }
 // var game = new Game("Ed", "Lake");
 // while(!game.over){
